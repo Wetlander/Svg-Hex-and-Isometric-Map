@@ -10,7 +10,7 @@ function hexCube(x,y,z) {
 map = [];
 mapCols = 41;
 mapRows = 13;
-mapLayers = 6;
+mapLayers = 3;
 var layer = 1;
 
 for (h=1; h<mapLayers; h++) {
@@ -19,9 +19,9 @@ for (h=1; h<mapLayers; h++) {
     map[h][i] = [];
     for (let j=1; j<=mapRows; j++) {
       if (h==1) {
-        map[h][i][j] = { height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
+        map[h][i][j] = { exists: true, height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
       } else {
-        map[h][i][j] = { height: false, cliff: false, terrain: 0, water: false };
+        map[h][i][j] = { exists: false, height: false, cliff: false, terrain: 0, water: false };
       }
     }
   }
@@ -41,8 +41,6 @@ objs = {
 };
 
 if (1==1) {
-  map[layer][17][13].height = [ 0, 0, 64, 128, 64, 0];
-  map[layer][16][13].terrain = 2;
   map[layer][16][13].water = true; map[layer][16][13].height = [ -128, -240, -240, -240, -240, -240];
   map[layer][16][12].water = true; map[layer][16][12].height = [ -240, -240, -240, -240, -240, -240];
   map[layer][15][12].water = true; map[layer][15][12].height = [ -240, -240, -240, -240, -240, -240];
@@ -53,8 +51,20 @@ if (1==1) {
   map[layer][12][11].water = true; map[layer][12][11].height = [ -240, -240, -240, -240, -240, -240];
   map[layer][12][10].water = true; map[layer][12][10].height = [ -240, -128, -128, -128, -128, -240];
 
+  map[layer][16][13].terrain = 2;
+  map[layer][16][12].terrain = 2;
+  map[layer][15][12].terrain = 2;
+  map[layer][14][12].terrain = 2;
+  map[layer][15][13].terrain = 2;
+  map[layer][13][12].terrain = 2;
+  map[layer][11][11].terrain = 2;
+  map[layer][12][11].terrain = 2;
+  map[layer][12][10].terrain = 2;
+
   map[layer][18][13].height = [ 0, 0, 0, 0, 0, -240];
 
+  map[layer][17][13].height = [ -80, -80, 0, 0, 0, 0];
+  map[layer][17][13].terrain = 2;
   //  R   C
   map[layer][15][11].objs = [{ type: 'tree' }];
   map[layer][15][10].objs = [{ type: 'tree' }];
@@ -68,8 +78,8 @@ if (1==1) {
   map[layer][16][11].height = [   0,   0,   255, 255,  0,   0];
   
   // layer 2
-  map[2][18][10] = { height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
-  map[2][17][11] = { height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
+  map[2][18][10] = { exists: true, height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
+  map[2][17][11] = { exists: true, height: [0,0,0,0,0,0], cliff: true, terrain: 1, water: false };
   
   // map refactoring from 256 base to 16 base which is the current default height method.
   for (let i=1; i<=mapCols; i++) {
@@ -83,7 +93,6 @@ if (1==1) {
       }
     }
   }
-  
 }
 
 isoMapCols = Math.floor(mapCols/4);
@@ -186,9 +195,9 @@ $.fn.hexGridWidget = function (hexRadius, hexHeight, rows, columns, cssClass) {
               x: (width * 1.5 * column) + ((row%2==0)?width*0.75:0),
               y: 0.5 * height * row
             };
-            
+
             isEdge = ( (column==columns && row%2==0)  || row>=rows-1)?true:false;
-            
+
             var size = new Point(hexRadius, hexRadius);
             p = [];
             // ToDo: Put these angle calculations into a function.
@@ -197,315 +206,303 @@ $.fn.hexGridWidget = function (hexRadius, hexHeight, rows, columns, cssClass) {
             var start_angle =0, corner, angle = 0;
             corner = 1; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[1] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             corner = 2; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[2] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             corner = 3; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[3] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             corner = 4; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[4] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             corner = 5; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[5] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             corner = 6; angle =  2.0 * Math.PI * (start_angle - corner) / 6.0;
             p[6] = new Point(size.x * Math.cos(angle), (size.y * Math.sin(angle)));
-            
+
             for (n=1; n<=6; n++) {
               p[n] = cartesianToIsometric(p[n]);
               p[n].y = p[n].y  - ((h-1)*hexHeight);
             }
             center = cartesianToIsometric(center);
             center.x = center.x + offsetwidth;
-            
+
             hexCenter = cartesianToIsometric(new Point(width, 0.50 * height));
             hexCenter = (new Point(width, 0.50 * height));
             hexCenter.x = hexCenter.x + center.x;
             hexCenter.y = hexCenter.y + center.y;
-            
-            // ╞═ Tile cliff/sides ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
-            if (map[h][row][column].cliff===true) {
-              let tmpPtA1 = ((toPointXy(p[3].x + 100, p[3].y - map[h][row][column].height[2] + 100)));
-              let tmpPtA2 = ((toPointXy(p[2].x + 100, p[2].y - map[h][row][column].height[1] + 100)));
-              
-              let tmpPtB1 = ((toPointXy(p[4].x + 100, p[4].y - map[h][row][column].height[3] + 100)));
-              let tmpPtB2 = ((toPointXy(p[3].x + 100, p[3].y - map[h][row][column].height[2] + 100)));
+            // *** Create svg group for this tile.
 
-              let tmpPtC1 = ((toPointXy(p[5].x + 100, p[5].y - map[h][row][column].height[4] + 100)));
-              let tmpPtC2 = ((toPointXy(p[4].x + 100, p[4].y - map[h][row][column].height[3] + 100)));
-              
-              let angA = getAngle(tmpPtA1.x, tmpPtA1.y, tmpPtA2.x, tmpPtA2.y) + 90;
-              createGradient($('svg')[0],'gradientDirtA_R'+row+'C'+column,[
-                {offset:'0%', 'stop-color':'#9e6936'},
-                {offset:'100%', 'stop-color':'#633d18'}
-              ], "rotate(" + angA + ")");
+            if (map[h][row][column]) {
+              let theTile = createSVG('g').attr({
+                'class':'hexTile', tabindex:-1
+              })
+              .attr({'id': 'hexTileC'+column+'R'+row+'L'+h, 'class': 'hexTile' })
+              .appendTo(svgParent).data({center:center});
 
-              let angB = getAngle(tmpPtB1.x, tmpPtB1.y, tmpPtB2.x, tmpPtB2.y) + 90;
-              createGradient($('svg')[0],'gradientDirtB_R'+row+'C'+column,[
-                {offset:'0%', 'stop-color':'#9e6936'},
-                {offset:'100%', 'stop-color':'#633d18'}
-              ], "rotate(" + angB + ")");
-              
-              let angC = getAngle(tmpPtC1.x, tmpPtC1.y, tmpPtC2.x, tmpPtC2.y) + 60;
-              createGradient($('svg')[0],'gradientDirtC_R'+row+'C'+column,[
-                {offset:'0%', 'stop-color':'#9e6936'},
-                {offset:'100%', 'stop-color':'#633d18'}
-              ], "rotate(" + angC + ")");
-              
-              
-              if (map[h][row][column].height!=false) {
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(p[1].x, p[1].y    - map[h][row][column].height[0]), toPoint(p[1].x, p[1].y+hexHeight - 0), toPoint(p[6].x, p[6].y+hexHeight - 0), toPoint(p[6].x, p[6].y    - map[h][row][column].height[5])
-                  ].join(' '),'class':'hexField', tabindex:-1
-                })
-                .attr({'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtA_R'+row+'C'+column + ')', 'style': "transform: skewY(0);" })
-                .appendTo(svgParent).data({center:center});
-              
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(p[6].x, p[6].y    - map[h][row][column].height[5]), toPoint(p[6].x, p[6].y+hexHeight - 0), toPoint(p[5].x, p[5].y+hexHeight - 0), toPoint(p[5].x, p[5].y    - map[h][row][column].height[4]),
-                  ].join(' '),'class':'hexField', tabindex: -1
-                })
-                .attr({ 'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtB_R'+row+'C'+column + ')', 'style': "transform: skewY(0);" })
-                .appendTo(svgParent).data({center:center});
-                
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(p[5].x, p[5].y    - map[h][row][column].height[4]), toPoint(p[5].x, p[5].y+hexHeight - 0), toPoint(p[4].x, p[4].y+hexHeight - 0), toPoint(p[4].x, p[4].y    - map[h][row][column].height[3]),
-                  ].join(' '),'class': 'hexField', tabindex: -1
-                })
-                .attr({ 'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtC_R'+row+'C'+column + ')', 'style': "transform: skewY(0);" })
-                .appendTo(svgParent).data({center:center});
+              // ╞═ Tile cliff/sides ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
+              if (map[h][row][column].cliff===true) {
+                let tmpPtA1 = ((toPointXy(p[3].x + 100, p[3].y - map[h][row][column].height[2] + 100)));
+                let tmpPtA2 = ((toPointXy(p[2].x + 100, p[2].y - map[h][row][column].height[1] + 100)));
+
+                let tmpPtB1 = ((toPointXy(p[4].x + 100, p[4].y - map[h][row][column].height[3] + 100)));
+                let tmpPtB2 = ((toPointXy(p[3].x + 100, p[3].y - map[h][row][column].height[2] + 100)));
+
+                let tmpPtC1 = ((toPointXy(p[5].x + 100, p[5].y - map[h][row][column].height[4] + 100)));
+                let tmpPtC2 = ((toPointXy(p[4].x + 100, p[4].y - map[h][row][column].height[3] + 100)));
+
+                let angA = getAngle(tmpPtA1.x, tmpPtA1.y, tmpPtA2.x, tmpPtA2.y) + 90;
+                createGradient($('svg')[0],'gradientDirtA_C'+column+'R'+row+'H'+h,[
+                  {offset:'0%', 'stop-color':'#9e6936'},
+                  {offset:'100%', 'stop-color':'#633d18'}
+                ], "rotate(" + angA + ")");
+
+                let angB = getAngle(tmpPtB1.x, tmpPtB1.y, tmpPtB2.x, tmpPtB2.y) + 90;
+                createGradient($('svg')[0],'gradientDirtB_C'+column+'R'+row+'H'+h,[
+                  {offset:'0%', 'stop-color':'#9e6936'},
+                  {offset:'100%', 'stop-color':'#633d18'}
+                ], "rotate(" + angB + ")");
+
+                let angC = getAngle(tmpPtC1.x, tmpPtC1.y, tmpPtC2.x, tmpPtC2.y) + 60;
+                createGradient($('svg')[0],'gradientDirtC_C'+column+'R'+row+'H'+h,[
+                  {offset:'0%', 'stop-color':'#9e6936'},
+                  {offset:'100%', 'stop-color':'#633d18'}
+                ], "rotate(" + angC + ")");
+
+
+                if (map[h][row][column].height!=false) {
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[1].x, p[1].y    - map[h][row][column].height[0]), toPoint(p[1].x, p[1].y+hexHeight - 0), toPoint(p[6].x, p[6].y+hexHeight - 0), toPoint(p[6].x, p[6].y    - map[h][row][column].height[5])
+                    ].join(' '),'class':'hexField', tabindex:-1
+                  })
+                  .attr({'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtA_C'+column+'R'+row+'H'+h + ')', 'style': "transform: skewY(0);" })
+                  .appendTo(theTile).data({center:center});
+
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[6].x, p[6].y    - map[h][row][column].height[5]), toPoint(p[6].x, p[6].y+hexHeight - 0), toPoint(p[5].x, p[5].y+hexHeight - 0), toPoint(p[5].x, p[5].y    - map[h][row][column].height[4]),
+                    ].join(' '),'class':'hexField', tabindex: -1
+                  })
+                  .attr({ 'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtB_C'+column+'R'+row+'H'+h + ')', 'style': "transform: skewY(0);" })
+                  .appendTo(theTile).data({center:center});
+
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[5].x, p[5].y    - map[h][row][column].height[4]), toPoint(p[5].x, p[5].y+hexHeight - 0), toPoint(p[4].x, p[4].y+hexHeight - 0), toPoint(p[4].x, p[4].y    - map[h][row][column].height[3]),
+                    ].join(' '),'class': 'hexField', tabindex: -1
+                  })
+                  .attr({ 'id': 'hexCliffR'+row+'C'+column, 'class': 'hexCliff', 'fill': 'url(#gradientDirtC_C'+column+'R'+row+'H'+h + ')', 'style': "transform: skewY(0);" })
+                  .appendTo(theTile).data({center:center});
+                }
               }
-            }
-            
-            map[h][row][column].start  = center;
-            map[h][row][column].center = hexCenter;
-            map[h][row][column].points = p;
-            map[h][row][column].row    = row;
-            map[h][row][column].column = column;
-            // ╞═ Field Tile ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
-            if (map[h][row][column].height!=false) {
-              createSVG('polygon').attr({
-                points: [
-                  toPoint(p[1].x, p[1].y - map[h][row][column].height[0]),
-                  toPoint(p[2].x, p[2].y - map[h][row][column].height[1]),
-                  toPoint(p[3].x, p[3].y - map[h][row][column].height[2]),
-                  toPoint(p[4].x, p[4].y - map[h][row][column].height[3]),
-                  toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
-                  toPoint(p[6].x, p[6].y - map[h][row][column].height[5])
-                ].join(' '),
-                'class':'hexField',
-                tabindex:1
-              }).attr({'id': 'hexC'+column+'R'+row}).click(function () {
-                console.log('clicked! ' + this.id);
-              })
-              .appendTo(svgParent).data({center:center, column:column, row:row}).on('click', hexClick).attr({'hex-column': column, 'hex-row': row});
-            }
-            
-            // ╞═ Water Tile ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
-            if (map[h][row][column].water===true) {
-              if (map[h][row][column].waterHeight===undefined) map[h][row][column].waterHeight = -5; // default height for all the water tiles if it has not been preset
-              
-              createSVG('polygon').attr({
-                points: [
-                  toPoint(p[1].x, p[1].y - map[h][row][column].waterHeight),
-                  toPoint(p[2].x, p[2].y - map[h][row][column].waterHeight),
-                  toPoint(p[3].x, p[3].y - map[h][row][column].waterHeight),
-                  toPoint(p[4].x, p[4].y - map[h][row][column].waterHeight),
-                  toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
-                  toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight)
-                ].join(' '),
-                'class':'hexWater',
-                tabindex:1
-              })
-              .attr({ 'id': 'hexC'+column+'R'+row, 'hex-column': column, 'hex-row': row })
-              .appendTo(svgParent)
-              .data({center:center, column:column, row:row})
-              .on('click', hexClick)
-              .click(function () {
-                console.log('clicked!');
-                console.log(this);
-              });
-              
-              // *** Water Tile edges
-              if (isEdge===true) {
+
+              map[h][row][column].start  = center;
+              map[h][row][column].center = hexCenter;
+              map[h][row][column].points = p;
+              map[h][row][column].row    = row;
+              map[h][row][column].column = column;
+              // ╞═ Tile ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
+              if (map[h][row][column].height!=false) {
+                let hexClass = '';
+                switch (map[h][row][column].terrain) {
+                  case 1: hexClass = 'hexField'; break;
+                  case 2: hexClass = 'hexSand'; break;
+                  default: hexClass = 'hexField';
+                }
+                createSVG('polygon').attr({
+                  points: [
+                    toPoint(p[1].x, p[1].y - map[h][row][column].height[0]),
+                    toPoint(p[2].x, p[2].y - map[h][row][column].height[1]),
+                    toPoint(p[3].x, p[3].y - map[h][row][column].height[2]),
+                    toPoint(p[4].x, p[4].y - map[h][row][column].height[3]),
+                    toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
+                    toPoint(p[6].x, p[6].y - map[h][row][column].height[5])
+                  ].join(' '),
+                  'class':hexClass,
+                  tabindex:1
+                }).attr({'id': 'hexC'+column+'R'+row}).click(function () {
+                  console.log('clicked! ' + this.id);
+                })
+                .appendTo(theTile).data({center:center, column:column, row:row}).on('click', hexClick).attr({'hex-column': column, 'hex-row': row});
+              }
+
+              // ╞═ Water Tile ═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
+              if (map[h][row][column].water===true) {
+                if (map[h][row][column].waterHeight===undefined) map[h][row][column].waterHeight = -5; // default height for all the water tiles if it has not been preset
+
                 createSVG('polygon').attr({
                   points: [
                     toPoint(p[1].x, p[1].y - map[h][row][column].waterHeight),
-                    toPoint(p[1].x, p[1].y - map[h][row][column].height[0]),
-                    toPoint(p[6].x, p[6].y - map[h][row][column].height[5]),
-                    toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight)
-                  ].join(' '),'class':'hexWater', tabindex:-1
-                })
-                .attr({'id': 'hexCliffR'+row+'C'+column })
-                .appendTo(svgParent).data({center:center});
-                
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight),
-                    toPoint(p[6].x, p[6].y - map[h][row][column].height[5]),
-                    toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
-                    toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
-                  ].join(' '),'class':'hexWater', tabindex: -1
-                })
-                .attr({ 'id': 'hexCliffR'+row+'C'+column })
-                .appendTo(svgParent).data({center:center});
-                
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
-                    toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
-                    toPoint(p[4].x, p[4].y - map[h][row][column].height[3]),
+                    toPoint(p[2].x, p[2].y - map[h][row][column].waterHeight),
+                    toPoint(p[3].x, p[3].y - map[h][row][column].waterHeight),
                     toPoint(p[4].x, p[4].y - map[h][row][column].waterHeight),
-                  ].join(' '),'class': 'hexWater', tabindex: -1
+                    toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
+                    toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight)
+                  ].join(' '),
+                  'class':'hexWater',
+                  tabindex:1
                 })
-                .attr({ 'id': 'hexCliffR'+row+'C'+column })
-                .appendTo(svgParent).data({center:center});
+                .attr({ 'id': 'hexC'+column+'R'+row, 'hex-column': column, 'hex-row': row })
+                .appendTo(theTile)
+                .data({center:center, column:column, row:row})
+                .on('click', hexClick)
+                .click(function () {
+                  console.log('clicked!');
+                  console.log(this);
+                });
+
+                // *** Water Tile edges
+                if (isEdge===true) {
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[1].x, p[1].y - map[h][row][column].waterHeight),
+                      toPoint(p[1].x, p[1].y - map[h][row][column].height[0]),
+                      toPoint(p[6].x, p[6].y - map[h][row][column].height[5]),
+                      toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight)
+                    ].join(' '),'class':'hexWater', tabindex:-1
+                  })
+                  .attr({'id': 'hexCliffR'+row+'C'+column })
+                  .appendTo(theTile).data({center:center});
+
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[6].x, p[6].y - map[h][row][column].waterHeight),
+                      toPoint(p[6].x, p[6].y - map[h][row][column].height[5]),
+                      toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
+                      toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
+                    ].join(' '),'class':'hexWater', tabindex: -1
+                  })
+                  .attr({ 'id': 'hexCliffR'+row+'C'+column })
+                  .appendTo(theTile).data({center:center});
+
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(p[5].x, p[5].y - map[h][row][column].waterHeight),
+                      toPoint(p[5].x, p[5].y - map[h][row][column].height[4]),
+                      toPoint(p[4].x, p[4].y - map[h][row][column].height[3]),
+                      toPoint(p[4].x, p[4].y - map[h][row][column].waterHeight),
+                    ].join(' '),'class': 'hexWater', tabindex: -1
+                  })
+                  .attr({ 'id': 'hexCliffR'+row+'C'+column })
+                  .appendTo(theTile).data({center:center});
+                }
               }
+
+
+
+              // ╞═ Hex Based objects. Rocks, trees ext ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
+              center = { x: (width * 1.5 * column) + ((row%2==0)?width*0.75:0), y: 0.5 * height * row };
+              center = cartesianToIsometric(center);
+              center.x = center.x + offsetwidth;
+
+              if (map[h][row][column].objs!==undefined) {
+                for (i=0; i<map[h][row][column].objs.length; i++) {
+                  if (map[h][row][column].objs[i].type == 'tree') {
+
+                    createSVG('g').attr({
+                      id: 'hexObj_I'+i+'C'+column+'R'+row,
+                      transform: "translate(" + (center.x - 35) +"," + (center.y - 78) + ")"
+                    }).click(function () {
+                      console.log('clicked a tree!');
+                      console.log(this);
+                    }).appendTo(svgParent).data({center:center});
+                    document.getElementById('hexObj_I'+i+'C'+column+'R'+row).innerHTML = objs.tree.svg;
+                  }
+                }
+              }
+
+
+
+
+                center = Point(map[h][row][column].start.x, map[h][row][column].start.y);
+                // looking for tiles that do not yet exist ... shit.
+                // *** Floor based object, they are above the base terrain but below most other objects. these are roads, paths, building floors...
+                if (column<(columns) && row<(rows-1) && ((row-1)%4)==0 && row>3 && column>1) {
+                  isoCol = Math.floor(column);
+                  isoRow = Math.floor((row-1)/4)+1;
+
+                  // grid points.
+                  //createSVG('circle').attr({ r: 1, cx: center.x, cy: center.y }).appendTo(svgParent).data({center:center});
+                  // the grid
+                  createSVG('polygon').attr({
+                    points: [
+                      toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
+                      toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
+                      toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
+                      toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
+                    ].join(' '),'class':'isoBase', tabindex:-1
+                  }).attr({'id': 'hexC'+column+'R'+row}).appendTo(svgParent).data({center:center});
+
+
+                  if (isoMap[isoRow][isoCol].floor==1) {
+                    i=1;
+                    createSVG('polygon').attr({
+                      points: [
+                        toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
+                        toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
+                      ].join(' '),'class':'isoFloor01', tabindex:-1
+                    }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
+
+                    //document.getElementById('hexObj_I'+i+'C'+column+'R'+row).innerHTML = objs.tree.svg;
+
+                  }
+
+                  if (isoMap[isoRow][isoCol].floor==2) {
+                    i=1;
+
+                    createSVG('polygon').attr({
+                      points: [
+                        toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
+                        toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
+                      ].join(' '),'class':'isoFloor02', tabindex:-1
+                    }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
+                  }
+
+                  if (isoMap[isoRow][isoCol].floor==3) {
+                    i=1;
+                    createSVG('polygon').attr({
+                      points: [
+                        toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
+                        toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
+                      ].join(' '),'class':'isoFloor03', tabindex:-1
+                    }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
+                  }
+
+                  if (isoMap[isoRow][isoCol].floor==4) {
+                    i=1;
+                    createSVG('polygon').attr({
+                      points: [
+                        toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
+                        toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
+                        toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
+                      ].join(' '),'class':'isoFloor04', tabindex:-1
+                    }).attr({
+                      'id': 'hexFloor_I'+i+'C'+column+'R'+row
+                    }).appendTo(svgParent).data({center:center});
+                  }
+                }
+
+
+
+
+
             }
-            
-            
-            
-            // ╞═ Hex Based objects. Rocks, trees ext ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╡
-            center = { x: (width * 1.5 * column) + ((row%2==0)?width*0.75:0), y: 0.5 * height * row };
-            center = cartesianToIsometric(center);
-            center.x = center.x + offsetwidth;
-          
-            if (map[h][row][column].objs!==undefined) {
-              for (i=0; i<map[h][row][column].objs.length; i++) {
-                if (map[h][row][column].objs[i].type == 'tree') {
-                  
-                  createSVG('g').attr({
-                    id: 'hexObj_I'+i+'C'+column+'R'+row,
-                    transform: "translate(" + (center.x - 35) +"," + (center.y - 78) + ")"
-                  }).click(function () {
-                    console.log('clicked a tree!');
-                    console.log(this);
-                  }).appendTo(svgParent).data({center:center});
-                  document.getElementById('hexObj_I'+i+'C'+column+'R'+row).innerHTML = objs.tree.svg;
-                  console.log(document.getElementById('hexObj_I'+i+'C'+column+'R'+row));
-                }
-              }
-            }
-
-
-
-
-              center = Point(map[h][row][column].start.x, map[h][row][column].start.y);
-              // looking for tiles that do not yet exist ... shit.
-              // *** Floor based object, they are above the base terrain but below most other objects. these are roads, paths, building floors...
-              if (column<(columns) && row<(rows-1) && ((row-1)%4)==0 && row>3 && column>1) {
-                isoCol = Math.floor(column);
-                isoRow = Math.floor((row-1)/4)+1;
-
-                // grid points.
-                //createSVG('circle').attr({ r: 1, cx: center.x, cy: center.y }).appendTo(svgParent).data({center:center});
-                // the grid
-                createSVG('polygon').attr({
-                  points: [
-                    toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
-                    toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
-                    toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
-                    toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
-                  ].join(' '),'class':'isoBase', tabindex:-1
-                }).attr({'id': 'hexC'+column+'R'+row}).appendTo(svgParent).data({center:center});
-
-
-                if (isoMap[isoRow][isoCol].floor==1) {
-                  i=1;
-                  createSVG('polygon').attr({
-                    points: [
-                      toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
-                      toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
-                    ].join(' '),'class':'isoFloor01', tabindex:-1
-                  }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
-
-                  //document.getElementById('hexObj_I'+i+'C'+column+'R'+row).innerHTML = objs.tree.svg;
-
-                }
-
-                if (isoMap[isoRow][isoCol].floor==2) {
-                  i=1;
-
-                  createSVG('polygon').attr({
-                    points: [
-                      toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
-                      toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
-                    ].join(' '),'class':'isoFloor02', tabindex:-1
-                  }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
-                }
-
-                if (isoMap[isoRow][isoCol].floor==3) {
-                  i=1;
-                  createSVG('polygon').attr({
-                    points: [
-                      toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
-                      toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
-                    ].join(' '),'class':'isoFloor03', tabindex:-1
-                  }).attr({'id': 'hexFloor_I'+i+'C'+column+'R'+row}).appendTo(svgParent).data({center:center});
-                }
-
-                if (isoMap[isoRow][isoCol].floor==4) {
-                  i=1;
-                  createSVG('polygon').attr({
-                    points: [
-                      toPoint(map[h][row + 0][column + 0].start.x - center.x, map[h][row + 0][column + 0].start.y - center.y),
-                      toPoint(map[h][row + 0][column - 1].start.x - center.x, map[h][row + 0][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column - 1].start.x - center.x, map[h][row - 4][column - 1].start.y - center.y),
-                      toPoint(map[h][row - 4][column + 0].start.x - center.x, map[h][row - 4][column + 0].start.y - center.y)
-                    ].join(' '),'class':'isoFloor04', tabindex:-1
-                  }).attr({
-                    'id': 'hexFloor_I'+i+'C'+column+'R'+row
-                  }).appendTo(svgParent).data({center:center});
-                }
-              }
-
-
-
-            
-            
           }
         }
       }
     }
-      
-      h=1;
-      
-      
-      // *** Isometric Overlays
-      if (h==1) {
-        
-        for (column = 1; column <= columns; column++) {
-          for (oe=1; oe<=2; oe++) {
-            for (row = oe; row <= rows; row+=2) {
 
 
-
-
-              
-              
-            }
-          }
-        }
-
-
-
-      }
-      
-    
-    
-    
-    
   var endTime = (new Date()).getTime();
   console.log('Render Complete');
   console.log('Finished in ' + (endTime - startTime) + ' ms');

@@ -7,7 +7,16 @@ svg {}
     z-index: 200;
     filter: saturate(0.42);
 }
-.hexWater { fill: #ceefef; fill-opacity: .85; stroke: #ceefef; stroke-width: 0.5; z-index: 200; }
+.hexSand {
+    fill: #e2d7c2;
+    stroke: #e2d7c2;
+    stroke-width: 0.2px;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+    stroke-opacity: 1;
+    filter: url(#filterFilmGrain2);
+}
+.hexWater { fill: #a8d4e2; fill-opacity: .65; stroke: #ceefef; stroke-width: 0.5; z-index: 200; }
 .hexDeep  { fill: url(#patternDirt); stroke: yellowgreen; stroke-width: 1; z-index: 100; }
 .hexCliff { stroke: #93602d; stroke-width: 0.25; z-index: 100; }
 .hexfield:focus   { outline:none; }
@@ -16,6 +25,12 @@ svg {}
 .hexfield.clicked { fill: black; }
 
 .isofield { fill: transparent; stroke: forestgreen; stroke-width: .5; }
+
+
+.hexTile:focus-within polygon {
+  stroke: #fff;
+  outline: none;
+}
 
 .red { fill: #ad0000; }
 
@@ -27,7 +42,7 @@ svg {}
 .isoFloor04 { fill:url(#linearGradientFloorEdgeD4); stroke:url(#linearGradientFloorEdgeD4); stroke-width:0.2px; stroke-linecap:butt; stroke-linejoin:miter; stroke-opacity:1; filter:url(#filterFilmGrain); }
 
 #container  {width: 1400px; height: 800px; overflow: hidden; }
-.svgPrimatives { width: 0px; height; 0px; position: absolute; top: -1; left: -1; }
+.svgPrimatives { width: 0; height: 0px; position: absolute; top: 0; left: 0; }
 .svgRender { max-width: 1500px; max-height: 800px; }
 
 
